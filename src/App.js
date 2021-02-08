@@ -1,40 +1,76 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
+import dogecoing from './img/dogecoin.png';
+import axios from 'axios';
 import {
   ChakraProvider,
-  Box,
-  Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
   theme,
+  Flex,
+  Heading,
+  Container,
 } from '@chakra-ui/react';
-import { ColorModeSwitcher } from './ColorModeSwitcher';
-import { Logo } from './Logo';
+import './index.css'
+import PriceCard from './components/PriceCard';
 
 function App() {
+  const [ticker, setTicker] = useState({
+    low: 0,
+    high: 0,
+    last: 0,
+  });
+  useEffect(() => {
+    async function getDogecoinPrice() {
+      const { data } = await axios.get(
+        'https://nitinr-cors.herokuapp.com/https://api.wazirx.com/api/v2/tickers/dogeusdt'
+      );
+      setTicker(data.ticker);
+    }
+    getDogecoinPrice();
+    setInterval(() => getDogecoinPrice(), 10000);
+  }, []);
   return (
     <ChakraProvider theme={theme}>
-      <Box textAlign="center" fontSize="xl">
-        <Grid minH="100vh" p={3}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-          <VStack spacing={8}>
-            <Logo h="40vmin" pointerEvents="none" />
-            <Text>
-              Edit <Code fontSize="xl">src/App.js</Code> and save to reload.
-            </Text>
-            <Link
-              color="teal.500"
-              href="https://chakra-ui.com"
-              fontSize="2xl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn Chakra
-            </Link>
-          </VStack>
-        </Grid>
-      </Box>
+      <div className="bcg">
+        <Container height="100vh">
+          <Flex
+            alignItems="center"
+            justifyContent="center"
+            flexDirection="column"
+          >
+            <img src={dogecoing} alt="doge coin" width={150} height={150} />
+            <Heading as="h1" size="2xl">
+              Live Dogecoin Price
+            </Heading>
+            <Heading p={4} as="h6" size="lg">
+              Dogecoin To The Moon 🚀🌕
+            </Heading>
+          </Flex>
+          <Flex
+            p="4"
+            flexDirection="column"
+            justifyContent="space-between"
+            maxW="1200px"
+          >
+            <PriceCard
+              type="low"
+              price={ticker.low}
+              border="4px"
+              borderColor="green"
+            />
+            <PriceCard
+              type="high"
+              price={ticker.high}
+              border="4px"
+              borderColor="red"
+            />
+            <PriceCard
+              type="current"
+              price={ticker.last}
+              border="4px"
+              borderColor="blue"
+            />
+          </Flex>
+        </Container>
+      </div>
     </ChakraProvider>
   );
 }
